@@ -1,0 +1,31 @@
+DashDeck
+Copyright (C) 2026 Safwan Sayeed
+Licensed under the GNU General Public License v3.0 (see LICENSE).
+
+DashDeck is based on AABrowser by kododake, licensed under GPL-3.0.
+  https://github.com/kododake/AABrowser
+
+Third-party components
+----------------------
+
+Brave adblock-rust (MPL-2.0)
+  https://github.com/brave/adblock-rust
+  Ad and tracker blocking engine, compiled into the native Shields library.
+
+uBlock Origin scriptlets and redirect resources (GPL-3.0)
+  https://github.com/gorhill/uBlock
+  app/src/main/assets/shields/resources.json, built by scripts/build-shields-resources.mjs.
+
+uBlock Origin filter lists: filters, unbreak (GPL-3.0)
+  https://github.com/uBlockOrigin/uAssets
+
+EasyList and EasyPrivacy (GPL-3.0 / CC BY-SA 3.0)
+  https://easylist.to
+
+BluMirror by BluDood (MIT), Copyright (c) 2026 BluDood
+  https://github.com/BluDood/BluMirror
+  The screen mirroring renderer and projection flow are derived from it.
+  License text: licenses/BluMirror-MIT.txt
+
+Material Symbols icons (Apache-2.0)
+  https://github.com/google/material-design-icons
