@@ -88,6 +88,15 @@
                     app:iconSize="18dp" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/topBarMic"
+                    style="@style/Widget.DashDeck.IconButton"
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:contentDescription="@string/voice_search"
+                    app:icon="@drawable/ic_mic"
+                    app:iconSize="18dp" />
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/persistentButtonGo"
                     style="@style/Widget.DashDeck.IconButton"
                     android:layout_width="40dp"

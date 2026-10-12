@@ -28,4 +28,5 @@ object AppConstants {
     const val REQUEST_CODE_POST_NOTIFICATIONS = 1101
     const val REQUEST_CODE_RECORD_AUDIO = 1102
     const val REQUEST_CODE_ACCESS_LOCATION = 1103
+    const val REQUEST_CODE_VOICE_SEARCH = 1104
 }
