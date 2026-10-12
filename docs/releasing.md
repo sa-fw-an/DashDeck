@@ -2,6 +2,8 @@
 
 ## App releases
 
+Run the "Before every push" and "Releasing" checklists in [AGENTS.md](../AGENTS.md) first.
+
 1. Update `versionCode` and `versionName` in `app/build.gradle.kts`.
 2. Add a `## [x.y.z] - YYYY-MM-DD` section to `CHANGELOG.md`.
 3. Commit (`chore(release): x.y.z`), then tag and push:
