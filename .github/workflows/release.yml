@@ -59,7 +59,7 @@ jobs:
           apk="app/build/renamedApks/release/DashDeck-$VERSION.apk"
           sha256sum "$apk" | sed 's#app/build/renamedApks/release/##' > "$apk.sha256"
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           name: DashDeck ${{ env.VERSION }}
           body_path: notes.md
