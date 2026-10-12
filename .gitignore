@@ -1,0 +1,23 @@
+# Gradle / Android Studio
+.gradle/
+.kotlin/
+build/
+captures/
+.externalNativeBuild/
+.cxx/
+*.iml
+.idea/
+local.properties
+
+# Rust
+native/**/target/
+
+# Signing material (never commit)
+*.jks
+*.keystore
+*.pem
+*.p12
+
+# OS / editors
+.DS_Store
+*.log
