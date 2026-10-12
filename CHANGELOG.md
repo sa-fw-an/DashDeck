@@ -2,6 +2,16 @@
 
 All notable changes to DashDeck. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.3.0] - 2026-10-12
+
+### Added
+- Voice search: a mic in the toolbar listens (through the car's microphone in Android Auto)
+  and searches or opens what you say.
+- Continue on phone: open the page from the car screen in DashDeck on the phone.
+- Shields blocks cross-site cookies by default, with a per-site exception and a "Clear cookies
+  for this site" button in the Shields panel.
+- The start page shows how many ads and trackers Shields has blocked.
+
 ## [0.2.2] - 2026-10-12
 
 ### Fixed
