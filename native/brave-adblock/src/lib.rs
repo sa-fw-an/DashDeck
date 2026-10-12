@@ -7,9 +7,10 @@ use adblock::lists::{FilterSet, ParseOptions};
 use adblock::request::Request;
 use adblock::resources::{PermissionMask, Resource};
 use adblock::Engine;
+use jni::errors::LogErrorAndDefault;
 use jni::objects::{JByteArray, JClass, JObjectArray, JString};
-use jni::sys::{jboolean, jbyteArray, jint, jstring, JNI_FALSE, JNI_TRUE};
-use jni::JNIEnv;
+use jni::sys::jint;
+use jni::{Env, EnvUnowned};
 use std::collections::HashSet;
 use std::sync::RwLock;
 
@@ -23,41 +24,27 @@ const API_VERSION: jint = 2;
 /// by scripts/shields-engine-release.sh).
 const ENGINE_VERSION: &str = "0.13.3";
 
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeApiVersion(
-    _env: JNIEnv,
-    _class: JClass,
-) -> jint {
-    API_VERSION
-}
-
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeEngineVersion(
-    mut env: JNIEnv,
-    _class: JClass,
-) -> jstring {
-    to_jstring(&mut env, ENGINE_VERSION)
-}
-
 /// Lists marked trusted may use uBO's "requiresTrust" scriptlets.
 const TRUSTED: PermissionMask = PermissionMask::from_bits(1);
 
-fn jstr(env: &mut JNIEnv, s: &JString) -> Option<String> {
-    if s.is_null() {
-        return None;
-    }
-    env.get_string(s).ok().map(Into::into)
-}
+type JniResult<T> = jni::errors::Result<T>;
 
-fn to_jstring(env: &mut JNIEnv, s: &str) -> jstring {
-    env.new_string(s).map(|s| s.into_raw()).unwrap_or(std::ptr::null_mut())
+// ---- Engine logic (plain Rust) ----
+
+fn filter_set(lists: Vec<String>, trusted_mask: i32) -> (FilterSet, usize) {
+    let mut set = FilterSet::new(false);
+    let mut rules = 0;
+    for (i, text) in lists.into_iter().enumerate() {
+        let permissions = if trusted_mask & (1 << i) != 0 { TRUSTED } else { PermissionMask::default() };
+        rules += text.lines().filter(|l| { let l = l.trim(); !l.is_empty() && !l.starts_with('!') && !l.starts_with('[') }).count();
+        set.add_filter_list(text, ParseOptions { permissions, ..ParseOptions::default() });
+    }
+    (set, rules)
 }
 
 fn apply_resources(engine: &mut Engine, resources_json: Option<String>) {
-    if let Some(json) = resources_json {
-        if let Ok(resources) = serde_json::from_str::<Vec<Resource>>(&json) {
-            engine.use_resources(resources);
-        }
+    if let Some(Ok(resources)) = resources_json.map(|json| serde_json::from_str::<Vec<Resource>>(&json)) {
+        engine.use_resources(resources);
     }
 }
 
@@ -67,155 +54,192 @@ fn install(engine: Engine) {
     }
 }
 
-/// Builds an engine from `lists` (parallel to `trusted`), installs it, and returns its
-/// serialized form for caching. Returns null on failure.
-#[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeBuild(
-    mut env: JNIEnv,
-    _class: JClass,
-    lists: JObjectArray,
-    trusted_mask: jint,
-    resources_json: JString,
-) -> jbyteArray {
-    let count = env.get_array_length(&lists).unwrap_or(0);
-    let mut set = FilterSet::new(false);
-    for i in 0..count {
-        let Ok(obj) = env.get_object_array_element(&lists, i) else { continue };
-        let Some(text) = jstr(&mut env, &JString::from(obj)) else { continue };
-        let permissions = if trusted_mask & (1 << i) != 0 { TRUSTED } else { PermissionMask::default() };
-        set.add_filter_list(text, ParseOptions { permissions, ..ParseOptions::default() });
-    }
+fn with_engine<T>(f: impl FnOnce(&Engine) -> Option<T>) -> Option<T> {
+    ENGINE.read().ok()?.as_ref().and_then(f)
+}
+
+/// None to allow, "" to block, or a data: URL to serve instead.
+fn check(url: &str, source: &str, kind: &str) -> Option<String> {
+    let request = Request::new(url, source, kind, "").ok()?;
+    with_engine(|engine| {
+        let result = engine.check_network_request(&request);
+        result.should_block().then(|| result.redirect.unwrap_or_default())
+    })
+}
+
+fn cosmetic(url: &str) -> Option<String> {
+    with_engine(|engine| {
+        let r = engine.url_cosmetic_resources(url);
+        Some(serde_json::json!({
+            "hide": r.hide_selectors,
+            "exceptions": r.exceptions,
+            "script": r.injected_script,
+            "generichide": r.generichide,
+        }).to_string())
+    })
+}
+
+fn hidden_selectors(classes: &str, ids: &str, exceptions: &str) -> Option<String> {
+    let parse = |s: &str| -> Vec<String> { serde_json::from_str(s).unwrap_or_default() };
+    let (classes, ids) = (parse(classes), parse(ids));
+    let exceptions: HashSet<String> = parse(exceptions).into_iter().collect();
+    with_engine(|engine| serde_json::to_string(&engine.hidden_class_id_selectors(&classes, &ids, &exceptions)).ok())
+}
+
+fn validate(lists: Vec<String>, trusted_mask: i32, resources: Option<String>) -> String {
+    let (set, rules) = filter_set(lists, trusted_mask);
     let mut engine = Engine::new_with_filter_set(set);
     let serialized = engine.serialize();
-    let resources = jstr(&mut env, &resources_json);
     apply_resources(&mut engine, resources);
-    install(engine);
-    env.byte_array_from_slice(&serialized)
-        .map(|a| a.into_raw())
-        .unwrap_or(std::ptr::null_mut())
+    let tests = self_test(&engine, &serialized, rules);
+    serde_json::json!({
+        "passed": tests.iter().all(|(_, ok)| *ok),
+        "rules": rules,
+        "tests": tests.iter().map(|(n, ok)| serde_json::json!({"name": n, "passed": ok})).collect::<Vec<_>>(),
+    }).to_string()
+}
+
+// ---- JNI layer (org.dashdeck.app.web.BraveAdblockNative) ----
+
+fn opt_string(env: &Env, s: &JString) -> JniResult<Option<String>> {
+    if s.is_null() { Ok(None) } else { s.try_to_string(env).map(Some) }
+}
+
+fn string_list(env: &mut Env, array: &JObjectArray<JString>) -> JniResult<Vec<String>> {
+    let mut out = Vec::new();
+    for i in 0..array.len(env)? {
+        let item = array.get_element(env, i)?;
+        out.push(item.try_to_string(env)?);
+    }
+    Ok(out)
+}
+
+fn new_string<'local>(env: &mut Env<'local>, s: Option<String>) -> JniResult<JString<'local>> {
+    match s {
+        Some(s) => JString::from_str(env, s),
+        None => Ok(JString::default()),
+    }
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeApiVersion(
+    _env: EnvUnowned,
+    _class: JClass,
+) -> jint {
+    API_VERSION
+}
+
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeEngineVersion<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+) -> JString<'local> {
+    env.with_env(|env| JString::from_str(env, ENGINE_VERSION)).resolve::<LogErrorAndDefault>()
+}
+
+/// Builds an engine from `lists`, installs it, and returns its serialized form for caching.
+#[unsafe(no_mangle)]
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeBuild<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    lists: JObjectArray<'local, JString<'local>>,
+    trusted_mask: jint,
+    resources_json: JString<'local>,
+) -> JByteArray<'local> {
+    env.with_env(|env| {
+        let (set, _) = filter_set(string_list(env, &lists)?, trusted_mask);
+        let mut engine = Engine::new_with_filter_set(set);
+        let serialized = engine.serialize();
+        apply_resources(&mut engine, opt_string(env, &resources_json)?);
+        install(engine);
+        env.byte_array_from_slice(&serialized)
+    })
+    .resolve::<LogErrorAndDefault>()
 }
 
 /// Loads a previously serialized engine. Returns false when the cache is stale or corrupt.
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeLoad(
-    mut env: JNIEnv,
-    _class: JClass,
-    serialized: JByteArray,
-    resources_json: JString,
-) -> jboolean {
-    let Ok(bytes) = env.convert_byte_array(&serialized) else { return JNI_FALSE };
-    let mut engine = Engine::default();
-    if engine.deserialize(&bytes).is_err() {
-        return JNI_FALSE;
-    }
-    let resources = jstr(&mut env, &resources_json);
-    apply_resources(&mut engine, resources);
-    install(engine);
-    JNI_TRUE
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeLoad<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    serialized: JByteArray<'local>,
+    resources_json: JString<'local>,
+) -> bool {
+    env.with_env(|env| -> JniResult<bool> {
+        let bytes = env.convert_byte_array(&serialized)?;
+        let mut engine = Engine::default();
+        if engine.deserialize(&bytes).is_err() {
+            return Ok(false);
+        }
+        apply_resources(&mut engine, opt_string(env, &resources_json)?);
+        install(engine);
+        Ok(true)
+    })
+    .resolve::<LogErrorAndDefault>()
 }
 
 /// Returns null to allow, "" to block, or a data: URL to serve in place of the request.
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeCheck(
-    mut env: JNIEnv,
-    _class: JClass,
-    url: JString,
-    source_url: JString,
-    resource_type: JString,
-) -> jstring {
-    let (Some(url), Some(source), Some(kind)) = (
-        jstr(&mut env, &url),
-        jstr(&mut env, &source_url),
-        jstr(&mut env, &resource_type),
-    ) else {
-        return std::ptr::null_mut();
-    };
-    let Ok(request) = Request::new(&url, &source, &kind, "") else { return std::ptr::null_mut() };
-    let Ok(guard) = ENGINE.read() else { return std::ptr::null_mut() };
-    let Some(engine) = guard.as_ref() else { return std::ptr::null_mut() };
-    let result = engine.check_network_request(&request);
-    if !result.should_block() {
-        return std::ptr::null_mut();
-    }
-    to_jstring(&mut env, result.redirect.as_deref().unwrap_or(""))
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeCheck<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    url: JString<'local>,
+    source_url: JString<'local>,
+    resource_type: JString<'local>,
+) -> JString<'local> {
+    env.with_env(|env| {
+        let verdict = check(&url.try_to_string(env)?, &source_url.try_to_string(env)?, &resource_type.try_to_string(env)?);
+        new_string(env, verdict)
+    })
+    .resolve::<LogErrorAndDefault>()
 }
 
 /// Site-specific cosmetic resources as JSON:
 /// {"hide":[...],"exceptions":[...],"script":"...","generichide":bool}
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeCosmetic(
-    mut env: JNIEnv,
-    _class: JClass,
-    url: JString,
-) -> jstring {
-    let Some(url) = jstr(&mut env, &url) else { return std::ptr::null_mut() };
-    let Ok(guard) = ENGINE.read() else { return std::ptr::null_mut() };
-    let Some(engine) = guard.as_ref() else { return std::ptr::null_mut() };
-    let r = engine.url_cosmetic_resources(&url);
-    let json = serde_json::json!({
-        "hide": r.hide_selectors,
-        "exceptions": r.exceptions,
-        "script": r.injected_script,
-        "generichide": r.generichide,
-    });
-    to_jstring(&mut env, &json.to_string())
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeCosmetic<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    url: JString<'local>,
+) -> JString<'local> {
+    env.with_env(|env| {
+        let json = cosmetic(&url.try_to_string(env)?);
+        new_string(env, json)
+    })
+    .resolve::<LogErrorAndDefault>()
 }
 
 /// Generic hide selectors for the classes/ids seen on a page. All inputs are JSON arrays.
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeHiddenSelectors(
-    mut env: JNIEnv,
-    _class: JClass,
-    classes: JString,
-    ids: JString,
-    exceptions: JString,
-) -> jstring {
-    let parse = |env: &mut JNIEnv, s: &JString| -> Vec<String> {
-        jstr(env, s).and_then(|j| serde_json::from_str(&j).ok()).unwrap_or_default()
-    };
-    let classes = parse(&mut env, &classes);
-    let ids = parse(&mut env, &ids);
-    let exceptions: HashSet<String> = parse(&mut env, &exceptions).into_iter().collect();
-    let Ok(guard) = ENGINE.read() else { return std::ptr::null_mut() };
-    let Some(engine) = guard.as_ref() else { return std::ptr::null_mut() };
-    let selectors = engine.hidden_class_id_selectors(&classes, &ids, &exceptions);
-    to_jstring(&mut env, &serde_json::to_string(&selectors).unwrap_or_else(|_| "[]".into()))
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeHiddenSelectors<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    classes: JString<'local>,
+    ids: JString<'local>,
+    exceptions: JString<'local>,
+) -> JString<'local> {
+    env.with_env(|env| {
+        let json = hidden_selectors(&classes.try_to_string(env)?, &ids.try_to_string(env)?, &exceptions.try_to_string(env)?);
+        new_string(env, json)
+    })
+    .resolve::<LogErrorAndDefault>()
 }
 
-/// Builds a candidate engine without installing it and runs DashDeck's self-test
-/// suite against it. Returns JSON: {"passed":bool,"tests":[{"name","passed"}],"rules":n}.
-/// Passing candidates are returned serialized under "engine" (base64) so the app
-/// can commit them with nativeLoad; failing ones are dropped.
+/// Builds a candidate engine without installing it and runs the self-test suite.
+/// Returns JSON: {"passed":bool,"rules":n,"tests":[{"name","passed"}]}.
 #[unsafe(no_mangle)]
-pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeValidate(
-    mut env: JNIEnv,
-    _class: JClass,
-    lists: JObjectArray,
+pub extern "system" fn Java_org_dashdeck_app_web_BraveAdblockNative_nativeValidate<'local>(
+    mut env: EnvUnowned<'local>,
+    _class: JClass<'local>,
+    lists: JObjectArray<'local, JString<'local>>,
     trusted_mask: jint,
-    resources_json: JString,
-) -> jstring {
-    let count = env.get_array_length(&lists).unwrap_or(0);
-    let mut set = FilterSet::new(false);
-    let mut rules = 0usize;
-    for i in 0..count {
-        let Ok(obj) = env.get_object_array_element(&lists, i) else { continue };
-        let Some(text) = jstr(&mut env, &JString::from(obj)) else { continue };
-        let permissions = if trusted_mask & (1 << i) != 0 { TRUSTED } else { PermissionMask::default() };
-        rules += text.lines().filter(|l| { let l = l.trim(); !l.is_empty() && !l.starts_with('!') && !l.starts_with('[') }).count();
-        set.add_filter_list(text, ParseOptions { permissions, ..ParseOptions::default() });
-    }
-    let mut engine = Engine::new_with_filter_set(set);
-    let serialized = engine.serialize();
-    apply_resources(&mut engine, jstr(&mut env, &resources_json));
-
-    let tests = self_test(&engine, &serialized, rules);
-    let passed = tests.iter().all(|(_, ok)| *ok);
-    let json = serde_json::json!({
-        "passed": passed,
-        "rules": rules,
-        "tests": tests.iter().map(|(n, ok)| serde_json::json!({"name": n, "passed": ok})).collect::<Vec<_>>(),
-    });
-    to_jstring(&mut env, &json.to_string())
+    resources_json: JString<'local>,
+) -> JString<'local> {
+    env.with_env(|env| {
+        let report = validate(string_list(env, &lists)?, trusted_mask, opt_string(env, &resources_json)?);
+        JString::from_str(env, report)
+    })
+    .resolve::<LogErrorAndDefault>()
 }
 
 /// Offline checks a healthy engine must pass. Kept in sync with the unit test below.

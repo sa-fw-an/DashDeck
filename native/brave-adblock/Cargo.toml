@@ -11,7 +11,7 @@ crate-type = ["cdylib", "rlib"]
 # "single-thread" (a default feature) makes Engine !Send/!Sync; we share one engine
 # across WebView request threads, so it is left out.
 adblock = { git = "https://github.com/brave/adblock-rust.git", tag = "v0.13.3", default-features = false, features = ["embedded-domain-resolver", "full-regex-handling"] }
-jni = "0.21"
+jni = "0.22"
 serde_json = "1"
 
 [profile.release]
