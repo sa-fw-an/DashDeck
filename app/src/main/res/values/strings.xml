@@ -1,6 +1,6 @@
 <resources>
     <string name="app_name">DashDeck</string>
-    <string name="app_credit">DashDeck</string>
+    <string name="app_credit">DashDeck · based on AABrowser by Kododake</string>
     <string name="menu_title">DashDeck</string>
     <string name="menu_close">Close</string>
     <string name="menu_address_label">Address or search</string>
@@ -164,11 +164,14 @@
 
     
     <string name="settings_license">License</string>
-    <string name="settings_license_description">DashDeck is licensed under GNU GPLv3 and includes code derived from AABrowser. The full upstream attribution is retained in the NOTICE file.</string>
+    <string name="settings_license_description">This application and its source code are licensed under the GNU General Public License version 3 (GPLv3). If you incorporate this application or use any of its code, you must include clear attribution to the repository: https://github.com/kododake/AABrowser</string>
+    <string name="settings_license_fork_notice">DashDeck is a modified version of AABrowser by Kododake and AABrowser contributors, distributed under the same license. Copyright (C) 2025 AABrowser Contributors. Modifications Copyright (C) 2026 Safwan Sayeed.\n\nAlso includes Brave adblock-rust (MPL-2.0), uBlock Origin resources and filter lists (GPLv3), EasyList (GPLv3) and code derived from BluMirror by BluDood (MIT). See NOTICE in the source repository.</string>
+    <string name="settings_license_original_project">AABrowser (original project)</string>
+    <string name="settings_license_dashdeck_source">DashDeck source code</string>
     
     <string name="open_source_view_licenses">View open-source licenses</string>
     
-    <string name="kododake_name">AABrowser upstream</string>
+    <string name="kododake_name">kododake (Lead)</string>
     <string name="menu_start_page">Start Page</string>
     <string name="menu_start_page_add_current">Add current page to start page</string>
     <string name="menu_home_page_set_current">Set current page as home page</string>
