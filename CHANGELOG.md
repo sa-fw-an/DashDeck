@@ -2,6 +2,19 @@
 
 All notable changes to DashDeck. Versions follow [Semantic Versioning](https://semver.org).
 
+## [0.2.2] - 2026-10-12
+
+### Fixed
+- Restored AABrowser's copyright and GPLv3 notices in every source file derived from it, and its
+  original license text and author credit in Settings. Credit to AABrowser by Kododake is shown in
+  the app menu and README.
+
+### Changed
+- Shields engine bridge updated to jni 0.22; native errors are logged and handled instead of
+  aborting the call.
+- Android Gradle Plugin 9.4.1, Gradle 9.8.1, AndroidX AppCompat 1.8.0, ConstraintLayout 2.2.2
+  and OkHttp 5.5.0.
+
 ## [0.2.1] - 2026-10-12
 
 First public release of DashDeck, a browser for Android Auto based on AABrowser.
