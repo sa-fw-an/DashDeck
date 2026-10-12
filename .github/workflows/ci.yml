@@ -42,7 +42,7 @@ jobs:
         with:
           workspaces: native/brave-adblock
 
-      - uses: gradle/actions/setup-gradle@v5
+      - uses: gradle/actions/setup-gradle@v6
 
       - name: Engine tests
         working-directory: native/brave-adblock
