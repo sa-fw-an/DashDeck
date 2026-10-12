@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick link tile. Background and edit state are set by StartPageAdapter. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="4dp">
+
+    <LinearLayout
+        android:id="@+id/slotContentLayout"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingStart="6dp"
+        android:paddingEnd="6dp">
+
+        <FrameLayout
+            android:id="@+id/iconContainer"
+            android:layout_width="36dp"
+            android:layout_height="36dp" />
+
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:ellipsize="end"
+            android:gravity="center"
+            android:lineSpacingMultiplier="0.95"
+            android:maxLines="2"
+            android:textAppearance="@style/TextAppearance.DashDeck.Label"
+            android:textColor="?attr/colorOnSurface" />
+
+        <!-- Kept for the adapter's API; not shown in the tile design. -->
+        <TextView
+            android:id="@+id/labelView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/urlText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/editBadge"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="2dp"
+        android:background="@drawable/edit_badge_background"
+        android:contentDescription="@string/quick_link_remove"
+        android:padding="4dp"
+        android:src="@drawable/ic_close"
+        android:visibility="gone"
+        app:tint="?attr/colorOnPrimary" />
+</FrameLayout>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- "System" theme palette (dark), matching Midnight. -->
+    <color name="theme_primary">#4C8DFF</color>
+    <color name="theme_on_primary">#06142B</color>
+    <color name="theme_primary_container">#16294A</color>
+    <color name="theme_on_primary_container">#CFE0FF</color>
+    <color name="theme_secondary">#A3ACB9</color>
+    <color name="theme_on_secondary">#15181D</color>
+    <color name="theme_secondary_container">#232831</color>
+    <color name="theme_on_secondary_container">#DDE2EA</color>
+    <color name="theme_tertiary">#4FD1B5</color>
+    <color name="theme_on_tertiary">#03251F</color>
+    <color name="theme_tertiary_container">#0F3A33</color>
+    <color name="theme_on_tertiary_container">#C2F3E7</color>
+    <color name="theme_error">#FF6B66</color>
+    <color name="theme_on_error">#2D0504</color>
+    <color name="theme_error_container">#4A1412</color>
+    <color name="theme_on_error_container">#FFD9D7</color>
+    <color name="theme_background">#0E1013</color>
+    <color name="theme_on_background">#E8EAED</color>
+    <color name="theme_surface">#15181D</color>
+    <color name="theme_on_surface">#E8EAED</color>
+    <color name="theme_surface_variant">#1E2228</color>
+    <color name="theme_on_surface_variant">#9AA0A8</color>
+    <color name="theme_outline">#3A4048</color>
+    <color name="theme_outline_variant">#262B32</color>
+    <color name="theme_surface_container_lowest">#0B0D10</color>
+    <color name="theme_surface_container_low">#13161A</color>
+    <color name="theme_surface_container">#181B20</color>
+    <color name="theme_surface_container_high">#1E2228</color>
+    <color name="theme_surface_container_highest">#252A31</color>
+</resources>

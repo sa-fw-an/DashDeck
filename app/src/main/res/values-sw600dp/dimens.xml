@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tablet Layout Dimensions (600dp+) -->
+    <dimen name="menu_padding_horizontal">32dp</dimen>
+    <dimen name="menu_padding_vertical">32dp</dimen>
+
+    <!-- Content Spacing -->
+
+    <!-- UI Elements -->
+
+    <!-- Button Sizes -->
+    <dimen name="icon_size_small">24dp</dimen>
+</resources>
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- In-app logo: the launcher mark on its own tile. -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/brand_ink" />
+            <corners android:radius="8dp" />
+        </shape>
+    </item>
+    <item
+        android:drawable="@drawable/dashdeck_mark"
+        android:left="-6dp"
+        android:top="-6dp"
+        android:right="-6dp"
+        android:bottom="-6dp" />
+</layer-list>

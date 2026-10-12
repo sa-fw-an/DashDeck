@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Landscape Layout Dimensions -->
+    <dimen name="menu_padding_vertical">16dp</dimen>
+</resources>
+

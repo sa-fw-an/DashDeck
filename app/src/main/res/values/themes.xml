@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Shared component styling. Palettes below only change colors. -->
+    <!-- Fixed themes use a fixed light/dark base, so changing theme never
+         changes the app night mode (which would recreate the screen twice). -->
+    <style name="Base.Theme.DashDeck" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerExtraSmall">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.DashDeck.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.DashDeck.Button.Outlined</item>
+        <item name="materialButtonTonalStyle">@style/Widget.DashDeck.Button.Tonal</item>
+        <item name="borderlessButtonStyle">@style/Widget.DashDeck.Button.Text</item>
+        <item name="materialIconButtonStyle">@style/Widget.DashDeck.IconButton</item>
+        <item name="materialCardViewStyle">@style/Widget.DashDeck.Card</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.DashDeck.Dialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.DashDeck.BottomSheetDialog</item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="textInputStyle">@style/Widget.DashDeck.TextInput</item>
+    </style>
+
+    <style name="Base.Theme.DashDeck.Dark" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerExtraSmall">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.DashDeck.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.DashDeck.Button.Outlined</item>
+        <item name="materialButtonTonalStyle">@style/Widget.DashDeck.Button.Tonal</item>
+        <item name="borderlessButtonStyle">@style/Widget.DashDeck.Button.Text</item>
+        <item name="materialIconButtonStyle">@style/Widget.DashDeck.IconButton</item>
+        <item name="materialCardViewStyle">@style/Widget.DashDeck.Card</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.DashDeck.Dialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.DashDeck.BottomSheetDialog</item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="textInputStyle">@style/Widget.DashDeck.TextInput</item>
+    </style>
+
+    <style name="Base.Theme.DashDeck.Light" parent="Theme.Material3.Light.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:enforceNavigationBarContrast">false</item>
+        <item name="shapeAppearanceSmallComponent">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceMediumComponent">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceLargeComponent">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerExtraSmall">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceCornerSmall">@style/ShapeAppearance.DashDeck.Small</item>
+        <item name="shapeAppearanceCornerMedium">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerLarge">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="shapeAppearanceCornerExtraLarge">@style/ShapeAppearance.DashDeck.Medium</item>
+        <item name="materialButtonStyle">@style/Widget.DashDeck.Button</item>
+        <item name="materialButtonOutlinedStyle">@style/Widget.DashDeck.Button.Outlined</item>
+        <item name="materialButtonTonalStyle">@style/Widget.DashDeck.Button.Tonal</item>
+        <item name="borderlessButtonStyle">@style/Widget.DashDeck.Button.Text</item>
+        <item name="materialIconButtonStyle">@style/Widget.DashDeck.IconButton</item>
+        <item name="materialCardViewStyle">@style/Widget.DashDeck.Card</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.DashDeck.Dialog</item>
+        <item name="bottomSheetDialogTheme">@style/ThemeOverlay.DashDeck.BottomSheetDialog</item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="textInputStyle">@style/Widget.DashDeck.TextInput</item>
+    </style>
+
+
+    <!-- "System": follows the phone (values / values-night palettes). -->
+    <style name="Theme.DashDeck" parent="Base.Theme.DashDeck">
+        <item name="colorPrimary">@color/theme_primary</item>
+        <item name="colorOnPrimary">@color/theme_on_primary</item>
+        <item name="colorPrimaryContainer">@color/theme_primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/theme_on_primary_container</item>
+        <item name="colorSecondary">@color/theme_secondary</item>
+        <item name="colorOnSecondary">@color/theme_on_secondary</item>
+        <item name="colorSecondaryContainer">@color/theme_secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/theme_on_secondary_container</item>
+        <item name="colorTertiary">@color/theme_tertiary</item>
+        <item name="colorOnTertiary">@color/theme_on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/theme_tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/theme_on_tertiary_container</item>
+        <item name="colorError">@color/theme_error</item>
+        <item name="colorOnError">@color/theme_on_error</item>
+        <item name="colorErrorContainer">@color/theme_error_container</item>
+        <item name="colorOnErrorContainer">@color/theme_on_error_container</item>
+        <item name="android:colorBackground">@color/theme_background</item>
+        <item name="colorOnBackground">@color/theme_on_background</item>
+        <item name="colorSurface">@color/theme_surface</item>
+        <item name="colorOnSurface">@color/theme_on_surface</item>
+        <item name="colorSurfaceVariant">@color/theme_surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/theme_on_surface_variant</item>
+        <item name="colorOutline">@color/theme_outline</item>
+        <item name="colorOutlineVariant">@color/theme_outline_variant</item>
+        <item name="colorSurfaceContainerLowest">@color/theme_surface_container_lowest</item>
+        <item name="colorSurfaceContainerLow">@color/theme_surface_container_low</item>
+        <item name="colorSurfaceContainer">@color/theme_surface_container</item>
+        <item name="colorSurfaceContainerHigh">@color/theme_surface_container_high</item>
+        <item name="colorSurfaceContainerHighest">@color/theme_surface_container_highest</item>
+        <item name="android:windowBackground">@color/theme_background</item>
+        <item name="android:navigationBarColor">@color/theme_background</item>
+        <item name="android:windowLightStatusBar">@bool/light_system_bars</item>
+        <item name="android:windowLightNavigationBar">@bool/light_system_bars</item>
+    </style>
+
+    <style name="Theme.DashDeck.Midnight" parent="Base.Theme.DashDeck.Dark">
+        <item name="colorPrimary">#4C8DFF</item>
+        <item name="colorOnPrimary">#06142B</item>
+        <item name="colorPrimaryContainer">#16294A</item>
+        <item name="colorOnPrimaryContainer">#CFE0FF</item>
+        <item name="colorSecondary">#A3ACB9</item>
+        <item name="colorOnSecondary">#15181D</item>
+        <item name="colorSecondaryContainer">#232831</item>
+        <item name="colorOnSecondaryContainer">#DDE2EA</item>
+        <item name="colorTertiary">#4FD1B5</item>
+        <item name="colorOnTertiary">#03251F</item>
+        <item name="colorTertiaryContainer">#0F3A33</item>
+        <item name="colorOnTertiaryContainer">#C2F3E7</item>
+        <item name="colorError">#FF6B66</item>
+        <item name="colorOnError">#2D0504</item>
+        <item name="colorErrorContainer">#4A1412</item>
+        <item name="colorOnErrorContainer">#FFD9D7</item>
+        <item name="android:colorBackground">#0E1013</item>
+        <item name="colorOnBackground">#E8EAED</item>
+        <item name="colorSurface">#15181D</item>
+        <item name="colorOnSurface">#E8EAED</item>
+        <item name="colorSurfaceVariant">#1E2228</item>
+        <item name="colorOnSurfaceVariant">#9AA0A8</item>
+        <item name="colorOutline">#3A4048</item>
+        <item name="colorOutlineVariant">#262B32</item>
+        <item name="colorSurfaceContainerLowest">#0B0D10</item>
+        <item name="colorSurfaceContainerLow">#13161A</item>
+        <item name="colorSurfaceContainer">#181B20</item>
+        <item name="colorSurfaceContainerHigh">#1E2228</item>
+        <item name="colorSurfaceContainerHighest">#252A31</item>
+        <item name="android:windowBackground">#0E1013</item>
+        <item name="android:navigationBarColor">#0E1013</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="Theme.DashDeck.Graphite" parent="Base.Theme.DashDeck.Dark">
+        <item name="colorPrimary">#F2A93B</item>
+        <item name="colorOnPrimary">#241500</item>
+        <item name="colorPrimaryContainer">#3D2A0B</item>
+        <item name="colorOnPrimaryContainer">#FFDDB0</item>
+        <item name="colorSecondary">#B4B4B4</item>
+        <item name="colorOnSecondary">#15181D</item>
+        <item name="colorSecondaryContainer">#2A2A2A</item>
+        <item name="colorOnSecondaryContainer">#E0E0E0</item>
+        <item name="colorTertiary">#4FD1B5</item>
+        <item name="colorOnTertiary">#03251F</item>
+        <item name="colorTertiaryContainer">#0F3A33</item>
+        <item name="colorOnTertiaryContainer">#C2F3E7</item>
+        <item name="colorError">#FF6B66</item>
+        <item name="colorOnError">#2D0504</item>
+        <item name="colorErrorContainer">#4A1412</item>
+        <item name="colorOnErrorContainer">#FFD9D7</item>
+        <item name="android:colorBackground">#121212</item>
+        <item name="colorOnBackground">#EDEDED</item>
+        <item name="colorSurface">#1A1A1A</item>
+        <item name="colorOnSurface">#EDEDED</item>
+        <item name="colorSurfaceVariant">#242424</item>
+        <item name="colorOnSurfaceVariant">#A6A6A6</item>
+        <item name="colorOutline">#444444</item>
+        <item name="colorOutlineVariant">#2C2C2C</item>
+        <item name="colorSurfaceContainerLowest">#0D0D0D</item>
+        <item name="colorSurfaceContainerLow">#171717</item>
+        <item name="colorSurfaceContainer">#1D1D1D</item>
+        <item name="colorSurfaceContainerHigh">#242424</item>
+        <item name="colorSurfaceContainerHighest">#2C2C2C</item>
+        <item name="android:windowBackground">#121212</item>
+        <item name="android:navigationBarColor">#121212</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+
+    <style name="Theme.DashDeck.Daylight" parent="Base.Theme.DashDeck.Light">
+        <item name="colorPrimary">#1F5EDB</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#E3ECFF</item>
+        <item name="colorOnPrimaryContainer">#0B2A66</item>
+        <item name="colorSecondary">#4A5568</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#E6E9EE</item>
+        <item name="colorOnSecondaryContainer">#1C2330</item>
+        <item name="colorTertiary">#0F7B6C</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#D4F2EC</item>
+        <item name="colorOnTertiaryContainer">#06302A</item>
+        <item name="colorError">#C9302C</item>
+        <item name="colorOnError">#FFFFFF</item>
+        <item name="colorErrorContainer">#FCE4E3</item>
+        <item name="colorOnErrorContainer">#5C0F0D</item>
+        <item name="android:colorBackground">#F4F5F7</item>
+        <item name="colorOnBackground">#14171C</item>
+        <item name="colorSurface">#FFFFFF</item>
+        <item name="colorOnSurface">#14171C</item>
+        <item name="colorSurfaceVariant">#EEF0F3</item>
+        <item name="colorOnSurfaceVariant">#59606A</item>
+        <item name="colorOutline">#C4C9D0</item>
+        <item name="colorOutlineVariant">#E1E4E8</item>
+        <item name="colorSurfaceContainerLowest">#FFFFFF</item>
+        <item name="colorSurfaceContainerLow">#F9FAFB</item>
+        <item name="colorSurfaceContainer">#F1F3F5</item>
+        <item name="colorSurfaceContainerHigh">#E9ECEF</item>
+        <item name="colorSurfaceContainerHighest">#E1E5E9</item>
+        <item name="android:windowBackground">#F4F5F7</item>
+        <item name="android:navigationBarColor">#F4F5F7</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+</resources>
