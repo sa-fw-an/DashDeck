@@ -51,7 +51,7 @@ jobs:
       - name: Lint, unit tests and debug build
         run: ./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: DashDeck-debug
           path: app/build/renamedApks/debug/*.apk
