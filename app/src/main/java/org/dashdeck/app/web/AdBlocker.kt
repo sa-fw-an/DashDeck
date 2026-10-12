@@ -65,10 +65,22 @@ object AdBlocker {
         } ?: return null
 
         pageUrl?.let { blockedCounts.getOrPut(it) { AtomicInteger() }.incrementAndGet() }
+        unsavedTotal.incrementAndGet()
         return if (verdict.startsWith("data:")) redirectResponse(verdict) else emptyResponse()
     }
 
     fun blockedCount(pageUrl: String?): Int = pageUrl?.let { blockedCounts[it]?.get() } ?: 0
+
+    // Requests blocked since the last save; persisted in batches, not per request.
+    private val unsavedTotal = java.util.concurrent.atomic.AtomicLong()
+
+    /** All-time blocked requests, including ones not saved yet. */
+    fun blockedTotal(context: Context): Long =
+        BrowserPreferences.getShieldsBlockedTotal(context) + unsavedTotal.get()
+
+    fun saveBlockedTotal(context: Context) {
+        BrowserPreferences.addShieldsBlocked(context, unsavedTotal.getAndSet(0))
+    }
 
     fun resetCount(pageUrl: String?) {
         if (blockedCounts.size > 64) blockedCounts.clear()

@@ -266,10 +266,11 @@ class StartPageManager(
     fun refreshShieldsStatus() {
         binding.startPageContent.startPageShieldsStatus.text = when {
             !BrowserPreferences.isShieldsEnabled(activity) -> activity.getString(R.string.start_page_shields_off)
-            BraveAdblockNative.isReady -> activity.getString(
-                R.string.start_page_shields_on,
-                NumberFormat.getIntegerInstance().format(BraveAdblockNative.ruleCount)
-            )
+            BraveAdblockNative.isReady -> {
+                val blocked = org.dashdeck.app.web.AdBlocker.blockedTotal(activity)
+                if (blocked > 0) activity.getString(R.string.start_page_shields_on_blocked, NumberFormat.getIntegerInstance().format(blocked))
+                else activity.getString(R.string.start_page_shields_on, NumberFormat.getIntegerInstance().format(BraveAdblockNative.ruleCount))
+            }
             else -> activity.getString(R.string.start_page_shields_loading)
         }
     }

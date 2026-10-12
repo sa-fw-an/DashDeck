@@ -59,6 +59,9 @@ object BrowserPreferences {
     // value must not disable the production engine.
     private const val KEY_SHIELDS_ENABLED = "shields_enabled"
     private const val KEY_SHIELDS_DISABLED_HOSTS = "shields_disabled_hosts"
+    private const val KEY_BLOCK_THIRD_PARTY_COOKIES = "block_third_party_cookies"
+    private const val KEY_THIRD_PARTY_COOKIE_HOSTS = "third_party_cookie_hosts"
+    private const val KEY_SHIELDS_BLOCKED_TOTAL = "shields_blocked_total"
     private const val KEY_SHIELDS_LISTS_UPDATED_AT = "shields_lists_updated_at"
     private const val KEY_RESUME_LAST_PAGE_ON_LAUNCH = "resume_last_page_on_launch"
     private const val KEY_RESTORE_TABS_ON_LAUNCH = "restore_tabs_on_launch"
@@ -211,6 +214,39 @@ object BrowserPreferences {
             .edit()
             .putStringSet(KEY_SHIELDS_DISABLED_HOSTS, updated)
             .apply()
+    }
+
+    fun isBlockThirdPartyCookies(context: Context): Boolean =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getBoolean(KEY_BLOCK_THIRD_PARTY_COOKIES, true)
+
+    fun setBlockThirdPartyCookies(context: Context, block: Boolean) {
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit()
+            .putBoolean(KEY_BLOCK_THIRD_PARTY_COOKIES, block).apply()
+    }
+
+    /** Whether pages on [host] may use third-party cookies (global setting plus per-site exception). */
+    fun allowsThirdPartyCookies(context: Context, host: String?): Boolean {
+        if (!isBlockThirdPartyCookies(context)) return true
+        val normalized = host?.lowercase()?.removePrefix("www.") ?: return false
+        return normalized in context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            .getStringSet(KEY_THIRD_PARTY_COOKIE_HOSTS, emptySet()).orEmpty()
+    }
+
+    fun setThirdPartyCookiesAllowedForHost(context: Context, host: String, allowed: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val normalized = host.lowercase().removePrefix("www.")
+        val hosts = prefs.getStringSet(KEY_THIRD_PARTY_COOKIE_HOSTS, emptySet()).orEmpty().toMutableSet()
+        if (allowed) hosts += normalized else hosts -= normalized
+        prefs.edit().putStringSet(KEY_THIRD_PARTY_COOKIE_HOSTS, hosts).apply()
+    }
+
+    fun getShieldsBlockedTotal(context: Context): Long =
+        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).getLong(KEY_SHIELDS_BLOCKED_TOTAL, 0L)
+
+    fun addShieldsBlocked(context: Context, count: Long) {
+        if (count <= 0) return
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putLong(KEY_SHIELDS_BLOCKED_TOTAL, prefs.getLong(KEY_SHIELDS_BLOCKED_TOTAL, 0L) + count).apply()
     }
 
     fun getShieldsListsUpdatedAt(context: Context): Long {

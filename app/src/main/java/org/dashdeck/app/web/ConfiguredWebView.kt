@@ -116,7 +116,7 @@ fun configureWebView(
 
         CookieManager.getInstance().also {
             it.setAcceptCookie(true)
-            it.setAcceptThirdPartyCookies(this, true)
+            it.setAcceptThirdPartyCookies(this, !org.dashdeck.app.data.BrowserPreferences.isBlockThirdPartyCookies(appContext))
         }
 
 
@@ -143,6 +143,7 @@ fun configureWebView(
             override fun onPageStarted(view: WebView, url: String?, favicon: Bitmap?) {
                 super.onPageStarted(view, url, favicon)
                 currentPageUrl.set(url)
+                applyCookiePolicy(view, url)
                 AdBlocker.resetCount(url)
                 ShieldsCosmetics.injectPendingScriptlets(view, url)
                 val stringUrl = url
@@ -172,6 +173,7 @@ fun configureWebView(
             override fun onPageFinished(view: WebView, url: String?) {
                 super.onPageFinished(view, url)
                 view.evaluateJavascript(SpeechRecognitionBridge.POLYFILL_JS, null)
+                AdBlocker.saveBlockedTotal(appContext)
                 url?.let(callbacks.onUrlChange)
             }
 
@@ -368,6 +370,28 @@ private fun handleCleartextIfNeeded(view: WebView, uri: Uri?, callbacks: Browser
     }
     callbacks.onCleartextNavigationRequested(uri, allowOnce, allowHost, cancel)
     return true
+}
+
+/** Third-party cookies follow the Shields setting, with per-site exceptions. */
+fun applyCookiePolicy(view: WebView, url: String?) {
+    val host = url?.let { Uri.parse(it).host }
+    CookieManager.getInstance().setAcceptThirdPartyCookies(
+        view, org.dashdeck.app.data.BrowserPreferences.allowsThirdPartyCookies(view.context, host)
+    )
+}
+
+/** Expires every cookie visible to [url] on its host and parent domains. */
+fun clearCookiesFor(url: String) {
+    val manager = CookieManager.getInstance()
+    val host = Uri.parse(url).host ?: return
+    val names = manager.getCookie(url)?.split(';')?.mapNotNull { it.substringBefore('=').trim().takeIf(String::isNotEmpty) }.orEmpty()
+    val labels = host.split('.')
+    val domains = (0 until (labels.size - 1).coerceAtLeast(1)).map { labels.drop(it).joinToString(".") }
+    for (name in names) {
+        manager.setCookie(url, "$name=; Max-Age=0; Path=/")
+        domains.forEach { domain -> manager.setCookie(url, "$name=; Max-Age=0; Path=/; Domain=$domain") }
+    }
+    manager.flush()
 }
 
 fun WebView.updateDesktopMode(enable: Boolean, profile: UserAgentProfile) {
