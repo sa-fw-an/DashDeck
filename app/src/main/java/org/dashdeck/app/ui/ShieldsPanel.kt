@@ -54,9 +54,31 @@ object ShieldsPanel {
                 render()
                 onSiteToggled()
             }
+
+            val blocksCookies = !BrowserPreferences.allowsThirdPartyCookies(context, host)
+            view.shieldsCookiesSwitch.isEnabled = host != null && BrowserPreferences.isBlockThirdPartyCookies(context)
+            view.shieldsCookiesHint.setText(
+                if (BrowserPreferences.isBlockThirdPartyCookies(context)) R.string.shields_panel_cookies_hint
+                else R.string.shields_panel_cookies_off_globally
+            )
+            view.shieldsCookiesSwitch.setOnCheckedChangeListener(null)
+            view.shieldsCookiesSwitch.isChecked = blocksCookies
+            view.shieldsCookiesSwitch.setOnCheckedChangeListener { _, checked ->
+                host ?: return@setOnCheckedChangeListener
+                BrowserPreferences.setThirdPartyCookiesAllowedForHost(context, host, !checked)
+                render()
+                onSiteToggled()
+            }
+            view.shieldsClearCookies.isEnabled = pageUrl != null
         }
 
         render()
+        view.shieldsClearCookies.setOnClickListener {
+            pageUrl ?: return@setOnClickListener
+            org.dashdeck.app.web.clearCookiesFor(pageUrl)
+            android.widget.Toast.makeText(context, context.getString(R.string.shields_panel_cookies_cleared, host), android.widget.Toast.LENGTH_SHORT).show()
+            onSiteToggled()
+        }
         view.shieldsSettings.setOnClickListener {
             sheet.dismiss()
             onOpenSettings()

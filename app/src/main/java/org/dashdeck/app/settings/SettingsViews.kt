@@ -401,6 +401,14 @@ object SettingsViews {
         ) { isChecked ->
             BrowserPreferences.setShieldsEnabled(context, isChecked)
         })
+        shieldsInner.addView(createSettingSwitchRow(
+            title = context.getString(R.string.settings_block_third_party_cookies),
+            description = context.getString(R.string.settings_block_third_party_cookies_description),
+            iconRes = R.drawable.lock_24,
+            isCheckedValue = BrowserPreferences.isBlockThirdPartyCookies(context)
+        ) { isChecked ->
+            BrowserPreferences.setBlockThirdPartyCookies(context, isChecked)
+        })
         val listsUpdatedAt = BrowserPreferences.getShieldsListsUpdatedAt(context)
         shieldsInner.addView(createSettingRow(
             title = context.getString(R.string.settings_shields_update_lists),
