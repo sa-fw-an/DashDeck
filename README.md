@@ -18,6 +18,9 @@
   <img src="docs/images/car-home.png" width="640" alt="DashDeck on an Android Auto display" />
 </p>
 
+DashDeck is a fork of [AABrowser](https://github.com/kododake/AABrowser) by
+[Kododake](https://github.com/kododake) and AABrowser contributors, licensed under GPLv3.
+
 > [!WARNING]
 > DashDeck is for parked vehicles and passengers. Never browse, watch video or share
 > your screen while driving.
@@ -93,8 +96,11 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues: [SECURITY.md](SECURITY.
 
 ## License
 
-DashDeck is free software under the [GNU General Public License v3.0](LICENSE). It is based on
-[AABrowser](https://github.com/kododake/AABrowser) by kododake. Third-party components and their
-licenses are listed in [NOTICE](NOTICE).
+DashDeck is free software under the [GNU General Public License v3.0](LICENSE).
+
+It is a modified version of [AABrowser](https://github.com/kododake/AABrowser), Copyright (C) 2025
+AABrowser Contributors, created by [Kododake](https://github.com/kododake). Files derived from
+AABrowser keep its copyright and license notice. Modifications Copyright (C) 2026 Safwan Sayeed.
+Third-party components and their licenses are listed in [NOTICE](NOTICE).
 
 Made by [Safwan Sayeed](https://safwansayeed.in).
