@@ -1,0 +1,70 @@
+name: Shields engine
+
+# Builds, tests and signs new Brave adblock-rust releases as engine plugins.
+# Published to the "shields-engine" pre-release, which installed apps check.
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: adblock-rust tag to build (default latest)
+        required: false
+
+permissions:
+  contents: write
+
+jobs:
+  engine:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Find versions
+        run: |
+          tag="${{ inputs.tag }}"
+          if [ -z "$tag" ]; then
+            tag="$(gh api repos/brave/adblock-rust/tags --jq '[.[].name | select(test("^v[0-9]+\\.[0-9]+\\.[0-9]+$"))] | sort_by(ltrimstr("v") | split(".") | map(tonumber)) | last')"
+          fi
+          published="$(gh release download shields-engine -p shields-engine.json -O - 2>/dev/null | jq -r .engineVersion || true)"
+          bundled="$(sed -n 's/^const ENGINE_VERSION: &str = "\(.*\)";/\1/p' native/brave-adblock/src/lib.rs)"
+          current="${published:-$bundled}"
+          echo "tag=$tag published=$published bundled=$bundled"
+          newest="$(printf '%s\n%s\n' "${tag#v}" "$current" | sort -V | tail -1)"
+          if [ "$newest" = "$current" ] && [ -z "${{ inputs.tag }}" ]; then
+            echo "Engine $current is current."
+          else
+            echo "BUILD=true" >> "$GITHUB_ENV"
+          fi
+          echo "TAG=$tag" >> "$GITHUB_ENV"
+
+      - if: env.BUILD == 'true'
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ndk;29.0.14206865
+
+      - if: env.BUILD == 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - name: Build, test and sign
+        if: env.BUILD == 'true'
+        env:
+          SHIELDS_ENGINE_SIGNING_KEY: ${{ secrets.SHIELDS_ENGINE_SIGNING_KEY }}
+        run: |
+          export DASHDECK_KEY_DIR="$RUNNER_TEMP/key"
+          mkdir -p "$DASHDECK_KEY_DIR"
+          printf '%s\n' "$SHIELDS_ENGINE_SIGNING_KEY" > "$DASHDECK_KEY_DIR/shields-engine-signing.pem"
+          scripts/shields-engine-release.sh "$TAG" out
+          rm -f "$DASHDECK_KEY_DIR/shields-engine-signing.pem"
+
+      - name: Publish
+        if: env.BUILD == 'true'
+        run: |
+          gh release view shields-engine >/dev/null 2>&1 || \
+            gh release create shields-engine --prerelease --title "Shields engine" \
+              --notes "Signed Brave adblock-rust engine plugins. DashDeck installs these after verifying the signature and running its self-tests."
+          gh release upload shields-engine out/* --clobber

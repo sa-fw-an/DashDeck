@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: ndk;29.0.14206865
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: native/brave-adblock
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      - name: Engine tests
+        working-directory: native/brave-adblock
+        run: cargo test --release
+
+      - name: Lint, unit tests and debug build
+        run: ./gradlew :app:lintDebug :app:testDebugUnitTest :app:assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DashDeck-debug
+          path: app/build/renamedApks/debug/*.apk
+          retention-days: 14

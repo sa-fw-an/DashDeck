@@ -1,0 +1,32 @@
+name: Bug report
+description: Something does not work
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: DashDeck version
+      placeholder: "0.2.1"
+    validations:
+      required: true
+  - type: input
+    id: phone
+    attributes:
+      label: Phone and Android version
+      placeholder: "Pixel 9, Android 16"
+  - type: dropdown
+    id: where
+    attributes:
+      label: Where
+      options: [Phone, Car display, Both]
+  - type: input
+    id: car
+    attributes:
+      label: Car or head unit (if relevant)

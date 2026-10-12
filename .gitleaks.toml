@@ -1,0 +1,6 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Third-party filter lists contain upstream commit hashes, not secrets"
+paths = ['''app/src/main/assets/shields/.*\.txt''']
