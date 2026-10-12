@@ -1,3 +1,23 @@
+/*
+ * Copyright (C) 2025 AABrowser Contributors (https://github.com/kododake/AABrowser)
+ * Copyright (C) 2026 Safwan Sayeed (https://github.com/sa-fw-an/DashDeck)
+ *
+ * Modified by Safwan Sayeed for DashDeck in 2026.
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://gnu.org>.
+ */
+
 package org.dashdeck.app.settings
 
 import android.content.ClipData
@@ -896,8 +916,21 @@ object SettingsViews {
             setPadding(dp(16), dp(12), dp(16), dp(16))
         }
         licenseInner.addView(createSectionTitle(context.getString(R.string.settings_license), R.drawable.gplv3, iconWidthDp = 48, iconHeightDp = 24, tintIcon = false, bottomPaddingDp = 8))
+        licenseInner.addView(ImageView(context).apply {
+            setImageResource(R.drawable.gplv3)
+            contentDescription = "GPLv3"
+            adjustViewBounds = true
+            layoutParams = LinearLayout.LayoutParams(dp(96), dp(48)).apply { bottomMargin = dp(8) }
+            scaleType = ImageView.ScaleType.FIT_START
+        })
         licenseInner.addView(TextView(context).apply {
             text = context.getString(R.string.settings_license_description)
+            setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
+            setTextColor(onSurfaceColor)
+            setPadding(0, 0, 0, dp(8))
+        })
+        licenseInner.addView(TextView(context).apply {
+            text = context.getString(R.string.settings_license_fork_notice)
             setTextAppearance(com.google.android.material.R.style.TextAppearance_Material3_BodyMedium)
             setTextColor(onSurfaceColor)
             setPadding(0, 0, 0, dp(8))
@@ -905,7 +938,11 @@ object SettingsViews {
         val viewKododakeButton = createListButton(R.id.ViewKododakeButton, context.getString(R.string.kododake_name), R.drawable.ic_github)
         val viewLicenseButton = createListButton(R.id.viewLicenseButton, context.getString(R.string.settings_license), R.drawable.info_24px)
         val viewOssLicensesButton = createListButton(R.id.viewOssLicensesButton, context.getString(R.string.open_source_view_licenses), R.drawable.search_24px)
+        val viewAabrowserButton = createListButton(View.generateViewId(), context.getString(R.string.settings_license_original_project), R.drawable.ic_github)
+        val viewDashDeckSourceButton = createListButton(View.generateViewId(), context.getString(R.string.settings_license_dashdeck_source), R.drawable.ic_github)
         licenseInner.addView(viewKododakeButton)
+        licenseInner.addView(viewAabrowserButton)
+        licenseInner.addView(viewDashDeckSourceButton)
         licenseInner.addView(viewLicenseButton)
         licenseInner.addView(viewOssLicensesButton)
         licenseCard.addView(licenseInner)
@@ -923,7 +960,9 @@ object SettingsViews {
             }
         }
 
-        viewKododakeButton.setOnClickListener { openUrl("https://github.com/kododake/AABrowser") }
+        viewKododakeButton.setOnClickListener { openUrl("https://github.com/kododake") }
+        viewAabrowserButton.setOnClickListener { openUrl("https://github.com/kododake/AABrowser") }
+        viewDashDeckSourceButton.setOnClickListener { openUrl(org.dashdeck.app.AppConstants.GITHUB_REPO_URL) }
         viewLicenseButton.setOnClickListener { openUrl("https://www.gnu.org/licenses/gpl-3.0.html") }
         viewOssLicensesButton.setOnClickListener {
             try {

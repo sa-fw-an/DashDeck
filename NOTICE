@@ -2,8 +2,11 @@ DashDeck
 Copyright (C) 2026 Safwan Sayeed
 Licensed under the GNU General Public License v3.0 (see LICENSE).
 
-DashDeck is based on AABrowser by kododake, licensed under GPL-3.0.
+DashDeck is a modified version of AABrowser by Kododake and AABrowser
+contributors, Copyright (C) 2025 AABrowser Contributors, licensed under GPL-3.0.
   https://github.com/kododake/AABrowser
+Source files derived from AABrowser retain its copyright and license header and
+note that they were modified for DashDeck in 2026.
 
 Third-party components
 ----------------------
