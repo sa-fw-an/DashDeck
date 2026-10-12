@@ -1,0 +1,22 @@
+[package]
+name = "dashdeck-brave-adblock"
+version = "0.2.0"
+edition = "2024"
+license = "MPL-2.0"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+# "single-thread" (a default feature) makes Engine !Send/!Sync; we share one engine
+# across WebView request threads, so it is left out.
+adblock = { git = "https://github.com/brave/adblock-rust.git", tag = "v0.13.3", default-features = false, features = ["embedded-domain-resolver", "full-regex-handling"] }
+jni = "0.21"
+serde_json = "1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+panic = "abort"
