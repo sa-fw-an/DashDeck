@@ -239,6 +239,8 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onPause() {
+        if (voiceSearch.isListening) voiceSearch.stop()
+        org.dashdeck.app.web.AdBlocker.saveBlockedTotal(this)
         uiManager.exitFullscreen()
         webView?.onPause()
         super.onPause()
@@ -261,6 +263,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupTopBar() {
+        binding.topBarMic.setOnClickListener { startVoiceSearch() }
         binding.topBarBack.setOnClickListener {
             webView?.takeIf { it.canGoBack() }?.goBack()
             updateNavigationButtons()
@@ -295,8 +298,10 @@ class MainActivity : AppCompatActivity() {
     /** "Continue on car screen": hands the current page to DashDeck on the car display. */
     private fun setupContinueOnCar() {
         if (isCarDisplay) {
-            binding.buttonContinueOnCar.isVisible = false
             org.dashdeck.app.ui.CarScreen.register(carScreenTarget)
+            binding.buttonContinueOnCar.setText(R.string.continue_on_phone)
+            binding.buttonContinueOnCar.setIconResource(R.drawable.ic_phone_android)
+            binding.buttonContinueOnCar.setOnClickListener { continueOnPhone() }
             return
         }
         androidx.car.app.connection.CarConnection(this).type.observe(this) { carConnectionType = it }
@@ -335,6 +340,72 @@ class MainActivity : AppCompatActivity() {
         uiManager.showMenuOverlay(animate = false)
         overlayManager.showSettingsView()
         binding.settingsViewRoot.post { binding.settingsViewRoot.scrollTo(0, scroll) }
+    }
+
+    /** "Continue on phone": opens the car's current page in DashDeck on the phone. */
+    private fun continueOnPhone() {
+        val url = currentUrl.takeIf { !startPageManager.isShowingStartPage && bookmarkManager.isActiveWebsiteUrl(it) }
+        if (url == null) {
+            Toast.makeText(this, R.string.continue_on_car_nothing, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url), this, MainActivity::class.java)
+        val options = android.app.ActivityOptions.makeBasic().setLaunchDisplayId(Display.DEFAULT_DISPLAY).toBundle()
+        // The car and phone windows are separate tasks. Reuse the phone's task if it
+        // exists; otherwise start a new one on the phone display. A plain startActivity
+        // would land on this (car) instance because it is singleTop.
+        val phoneTask = getSystemService(android.app.ActivityManager::class.java).appTasks
+            .firstOrNull { val info = it.taskInfo; info != null && info.taskId != taskId && info.baseActivity?.className == MainActivity::class.java.name }
+        if (phoneTask != null) {
+            phoneTask.moveToFront()
+            phoneTask.startActivity(this, intent, options)
+        } else {
+            startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_MULTIPLE_TASK), options)
+        }
+        webView?.evaluateJavascript("document.querySelectorAll('video,audio').forEach(function(m){m.pause()})", null)
+        uiManager.hideMenuOverlay()
+        Toast.makeText(this, R.string.continue_on_phone_sent, Toast.LENGTH_SHORT).show()
+    }
+
+    private val voiceSearch by lazy {
+        org.dashdeck.app.ui.VoiceSearch(
+            this,
+            onListeningChanged = { listening ->
+                binding.topBarMic.iconTint = android.content.res.ColorStateList.valueOf(
+                    themeManager.resolveThemeColor(
+                        if (listening) androidx.appcompat.R.attr.colorPrimary else com.google.android.material.R.attr.colorOnSurfaceVariant
+                    )
+                )
+                binding.persistentAddressEdit.hint = getString(if (listening) R.string.voice_listening else R.string.menu_address_label)
+                if (listening) binding.persistentAddressEdit.setText("")
+            },
+            onPartial = { binding.persistentAddressEdit.hint = it },
+            onResult = { text ->
+                binding.persistentAddressEdit.setText(text)
+                navigationManager.navigateToAddress(text, closeMenuAfterNavigate = true)
+            },
+            onError = { noMatch ->
+                if (noMatch) Toast.makeText(this, R.string.voice_no_match, Toast.LENGTH_SHORT).show()
+            },
+        )
+    }
+
+    private fun startVoiceSearch() {
+        if (voiceSearch.isListening) {
+            voiceSearch.stop()
+            return
+        }
+        if (!voiceSearch.isAvailable) {
+            Toast.makeText(this, R.string.voice_unavailable, Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (checkSelfPermission(android.Manifest.permission.RECORD_AUDIO) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            // Permission prompts can't be shown on the car display.
+            if (isCarDisplay) Toast.makeText(this, R.string.voice_permission_on_phone, Toast.LENGTH_LONG).show()
+            else requestPermissions(arrayOf(android.Manifest.permission.RECORD_AUDIO), AppConstants.REQUEST_CODE_VOICE_SEARCH)
+            return
+        }
+        voiceSearch.start()
     }
 
     private val engineRevertedListener: (Context) -> Unit = { showEngineRevertedNotice() }
@@ -379,6 +450,10 @@ class MainActivity : AppCompatActivity() {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == AppConstants.REQUEST_CODE_VOICE_SEARCH) {
+            if (grantResults.firstOrNull() == android.content.pm.PackageManager.PERMISSION_GRANTED) voiceSearch.start()
+            return
+        }
         permissionManager.handleRequestPermissionsResult(requestCode, grantResults) { granted ->
             val speechTab = tabManager.browserTabs.firstOrNull { it.id == permissionManager.pendingSpeechBridgeTabId }
             speechTab?.speechBridge?.onPermissionResult(granted)
