@@ -41,7 +41,7 @@ jobs:
           echo "TAG=$tag" >> "$GITHUB_ENV"
 
       - if: env.BUILD == 'true'
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
           packages: ndk;29.0.14206865
 
